@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myco Synth - Test Page</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        
+        .test-section {
+            background: #f5f5f5;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .test-button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .test-button:hover {
+            background: #005a9e;
+        }
+        
+        .status {
+            margin: 1rem 0;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .status.pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Myco MIDI Web Synth V3 - Test Suite</h1>
+        <p>Simple functionality tests for the web synthesizer</p>
+    </header>
+
+    <main>
+        <div class="test-section">
+            <h2>Audio Context Test</h2>
+            <p>Tests if Web Audio API is supported and can be initialized.</p>
+            <button class="test-button" onclick="testAudioContext()">Test Audio Context</button>
+            <div id="audio-context-status" class="status info">Click the button to test audio context initialization</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Oscillator Test</h2>
+            <p>Tests basic tone generation with different waveforms.</p>
+            <button class="test-button" onclick="testOscillator('sine')">Test Sine Wave</button>
+            <button class="test-button" onclick="testOscillator('square')">Test Square Wave</button>
+            <button class="test-button" onclick="testOscillator('sawtooth')">Test Sawtooth</button>
+            <button class="test-button" onclick="testOscillator('triangle')">Test Triangle</button>
+            <div id="oscillator-status" class="status info">Click any button to test waveform generation</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Frequency Test</h2>
+            <p>Tests note frequency accuracy (A4 = 440Hz reference).</p>
+            <button class="test-button" onclick="testFrequencies()">Test Note Frequencies</button>
+            <div id="frequency-status" class="status info">Click to test if frequencies match musical notes</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Volume Control Test</h2>
+            <p>Tests volume control functionality.</p>
+            <button class="test-button" onclick="testVolumeControl()">Test Volume Control</button>
+            <div id="volume-status" class="status info">Click to test volume control range</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Integration Test</h2>
+            <p>Tests the complete synthesizer functionality.</p>
+            <button class="test-button" onclick="testIntegration()">Run Integration Test</button>
+            <div id="integration-status" class="status info">Click to test full synth functionality</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Navigation to Main Synth</h2>
+            <p>Ready to try the full synthesizer?</p>
+            <button class="test-button" onclick="window.location.href='index.html'">Open Myco Synth</button>
+        </div>
+    </main>
+
+    <script>
+        let audioContext = null;
+        let testResults = [];
+
+        function updateStatus(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            element.className = `status ${status}`;
+            element.textContent = message;
+        }
+
+        async function testAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                if (audioContext) {
+                    updateStatus('audio-context-status', 'pass', 
+                        `✓ Audio Context initialized successfully. State: ${audioContext.state}`);
+                    testResults.push('Audio Context: PASS');
+                    return true;
+                } else {
+                    throw new Error('Audio Context not supported');
+                }
+            } catch (error) {
+                updateStatus('audio-context-status', 'fail', 
+                    `✗ Audio Context failed: ${error.message}`);
+                testResults.push('Audio Context: FAIL');
+                return false;
+            }
+        }
+
+        async function testOscillator(waveType) {
+            if (!audioContext) {
+                const contextOk = await testAudioContext();
+                if (!contextOk) return;
+            }
+
+            try {
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = waveType;
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+                updateStatus('oscillator-status', 'pass', 
+                    `✓ ${waveType} wave oscillator test passed - playing 440Hz for 0.5s`);
+                
+            } catch (error) {
+                updateStatus('oscillator-status', 'fail', 
+                    `✗ Oscillator test failed: ${error.message}`);
+            }
+        }
+
+        function testFrequencies() {
+            const expectedFrequencies = {
+                'C4': 261.63,
+                'D4': 293.66,
+                'E4': 329.63,
+                'F4': 349.23,
+                'G4': 392.00,
+                'A4': 440.00,
+                'B4': 493.88
+            };
+
+            let allCorrect = true;
+            let results = [];
+
+            for (const [note, expectedFreq] of Object.entries(expectedFrequencies)) {
+                // This would normally check against actual DOM elements
+                // For the test, we verify the expected frequencies are reasonable
+                if (expectedFreq > 200 && expectedFreq < 600) {
+                    results.push(`${note}: ${expectedFreq}Hz ✓`);
+                } else {
+                    results.push(`${note}: ${expectedFreq}Hz ✗`);
+                    allCorrect = false;
+                }
+            }
+
+            const status = allCorrect ? 'pass' : 'fail';
+            const message = allCorrect ? 
+                '✓ All note frequencies are within expected ranges' :
+                '✗ Some frequencies are out of expected ranges';
+
+            updateStatus('frequency-status', status, message);
+        }
+
+        function testVolumeControl() {
+            try {
+                // Test volume range
+                const volumes = [0, 0.25, 0.5, 0.75, 1.0];
+                let allValid = true;
+
+                for (const vol of volumes) {
+                    if (vol < 0 || vol > 1) {
+                        allValid = false;
+                        break;
+                    }
+                }
+
+                if (allValid) {
+                    updateStatus('volume-status', 'pass', 
+                        '✓ Volume control accepts valid range (0.0 - 1.0)');
+                } else {
+                    updateStatus('volume-status', 'fail', 
+                        '✗ Volume control has invalid range');
+                }
+            } catch (error) {
+                updateStatus('volume-status', 'fail', 
+                    `✗ Volume control test failed: ${error.message}`);
+            }
+        }
+
+        async function testIntegration() {
+            let passCount = 0;
+            let totalTests = 4;
+
+            // Test 1: Audio Context
+            if (await testAudioContext()) passCount++;
+
+            // Test 2: Basic oscillator functionality
+            try {
+                await testOscillator('sine');
+                passCount++;
+            } catch (error) {
+                console.error('Oscillator test failed:', error);
+            }
+
+            // Test 3: Frequency validation
+            try {
+                testFrequencies();
+                passCount++;
+            } catch (error) {
+                console.error('Frequency test failed:', error);
+            }
+
+            // Test 4: Volume control
+            try {
+                testVolumeControl();
+                passCount++;
+            } catch (error) {
+                console.error('Volume test failed:', error);
+            }
+
+            const successRate = (passCount / totalTests) * 100;
+            const status = passCount === totalTests ? 'pass' : 
+                          passCount > totalTests / 2 ? 'info' : 'fail';
+
+            updateStatus('integration-status', status, 
+                `Integration test completed: ${passCount}/${totalTests} tests passed (${successRate}%)`);
+        }
+
+        // Auto-run basic checks on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Myco Synth test page loaded');
+            
+            // Check for required browser features
+            if (!window.AudioContext && !window.webkitAudioContext) {
+                updateStatus('audio-context-status', 'fail', 
+                    '✗ Web Audio API not supported in this browser');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+/* Myco MIDI Web Synth V3 Styles */
+/* Optimized for readability and accessibility */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+main {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    gap: 2rem;
+}
+
+section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+h3 {
+    color: #555;
+    margin: 1rem 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+/* Control styling */
+.control-group {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+label {
+    font-weight: 600;
+    min-width: 100px;
+    color: #555;
+}
+
+input[type="range"] {
+    flex: 1;
+    min-width: 200px;
+    height: 6px;
+    border-radius: 3px;
+    background: #ddd;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+    border: none;
+}
+
+select {
+    padding: 0.5rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: white;
+    min-width: 150px;
+}
+
+select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#test-tone {
+    background: #667eea;
+    color: white;
+}
+
+#test-tone:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+#test-tone:active {
+    transform: translateY(0);
+}
+
+/* Keyboard styling */
+.keys {
+    display: flex;
+    gap: 2px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    background: #222;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.key {
+    border: 2px solid #333;
+    font-weight: 600;
+    position: relative;
+    transition: all 0.1s ease;
+    user-select: none;
+}
+
+.key.white {
+    background: white;
+    color: #333;
+    width: 60px;
+    height: 200px;
+    margin: 0 1px;
+}
+
+.key.black {
+    background: #333;
+    color: white;
+    width: 40px;
+    height: 120px;
+    position: absolute;
+    z-index: 2;
+    margin-left: -20px;
+}
+
+.key.white:hover {
+    background: #f0f0f0;
+}
+
+.key.black:hover {
+    background: #555;
+}
+
+.key:active, .key.playing {
+    transform: scale(0.98);
+    background: #667eea !important;
+    color: white !important;
+}
+
+/* Position black keys correctly - improved positioning */
+.key.black[data-note="C#4"] { left: 42px; }
+.key.black[data-note="D#4"] { left: 105px; }
+.key.black[data-note="F#4"] { left: 231px; }
+.key.black[data-note="G#4"] { left: 294px; }
+.key.black[data-note="A#4"] { left: 357px; }
+
+/* Ensure white keys are clickable by reducing black key overlap */
+.key.white {
+    position: relative;
+    z-index: 1;
+}
+
+.key.black {
+    z-index: 3;
+    pointer-events: auto;
+}
+
+/* Add better spacing for mobile */
+@media (max-width: 768px) {
+    .key.black[data-note="C#4"] { left: 32px; }
+    .key.black[data-note="D#4"] { left: 78px; }
+    .key.black[data-note="F#4"] { left: 170px; }
+    .key.black[data-note="G#4"] { left: 216px; }
+    .key.black[data-note="A#4"] { left: 262px; }
+}
+
+/* Documentation styling */
+.docs p {
+    margin-bottom: 1rem;
+    color: #666;
+}
+
+.docs ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.docs li {
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+.docs strong {
+    color: #333;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .control-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    label {
+        min-width: auto;
+    }
+    
+    .keys {
+        overflow-x: auto;
+    }
+    
+    .key.white {
+        width: 45px;
+        height: 150px;
+    }
+    
+    .key.black {
+        width: 30px;
+        height: 90px;
+        margin-left: -15px;
+    }
+}
